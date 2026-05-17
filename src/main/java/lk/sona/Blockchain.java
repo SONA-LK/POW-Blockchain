@@ -15,7 +15,7 @@ public class Blockchain {
 
         // Genesis Block
         Block genesis = new Block(0, "0");
-        genesis.addTransaction(new Transaction("System", "Genesis", 0));
+        genesis.addTransaction(new Transaction(new Wallet(), "Genesis", 0));
         genesis.mineBlock(difficulty);
         chain.add(genesis);
     }
