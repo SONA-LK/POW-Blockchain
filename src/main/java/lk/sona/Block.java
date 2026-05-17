@@ -1,57 +1,70 @@
 package lk.sona;
 
-import java.security.MessageDigest;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Block {
     private int index;
     private long timestamp;
     private String previousHash;
-    String data;
+    private List<Transaction> transactions;
     private String hash;
     private int nonce;
 
-    public Block(int index, String previousHash, String data) {
+    public Block(int index, String previousHash) {
         this.index = index;
-        this.timestamp = Instant.now().toEpochMilli();
+        this.timestamp = System.currentTimeMillis();
         this.previousHash = previousHash;
-        this.data = data;
+        this.transactions = new ArrayList<>();
         this.nonce = 0;
         this.hash = calculateHash();
     }
 
-    // Calculate SHA-256 hash
+    public void addTransaction(Transaction transaction) {
+        if (transaction != null) {
+            transactions.add(transaction);
+            hash = calculateHash(); // Recalculate hash when transaction is added
+        }
+    }
+
     public String calculateHash() {
-        String input = index + timestamp + previousHash + data + nonce;
+        StringBuilder txData = new StringBuilder();
+        for (Transaction tx : transactions) {
+            txData.append(tx.getTransactionId());
+        }
+
+        String input = index + timestamp + previousHash + txData + nonce;
+        return sha256(input);
+    }
+
+    private String sha256(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hashBytes = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
+            StringBuilder hex = new StringBuilder();
             for (byte b : hashBytes) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
+                hex.append(String.format("%02x", b));
             }
-            return hexString.toString();
+            return hex.toString();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    // Mining - Proof of Work
     public void mineBlock(int difficulty) {
-        String target = "0".repeat(difficulty);  // e.g., "0000"
+        String target = "0".repeat(difficulty);
         while (!hash.substring(0, difficulty).equals(target)) {
             nonce++;
             hash = calculateHash();
         }
-        System.out.println("Block mined! Hash: " + hash);
+        System.out.println("Block mined! #" + index + " Hash: " + hash.substring(0, 12) + "...");
     }
 
     // Getters
     public String getHash() { return hash; }
     public String getPreviousHash() { return previousHash; }
-    public String getData() { return data; }
+    public List<Transaction> getTransactions() { return transactions; }
     public int getIndex() { return index; }
 }

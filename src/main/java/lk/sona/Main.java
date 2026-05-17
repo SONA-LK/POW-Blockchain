@@ -4,28 +4,24 @@ package lk.sona;
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Starting Simple Blockchain...\n");
+        System.out.println("=== Java Blockchain - Level 2 ===\n");
 
-        Blockchain blockchain = new Blockchain(4); // Difficulty = 4 zeros
+        Blockchain blockchain = new Blockchain(4);
 
-        System.out.println("Mining block 1...");
-        blockchain.addBlock("Transaction: Alice sent 10 BTC to Bob");
+        // Create transactions
+        blockchain.addTransaction(new Transaction("Alice", "Bob", 10.5));
+        blockchain.addTransaction(new Transaction("Bob", "Charlie", 3.0));
+        blockchain.addTransaction(new Transaction("Charlie", "Alice", 2.0));
 
-        System.out.println("Mining block 2...");
-        blockchain.addBlock("Transaction: Bob sent 5 BTC to Charlie");
+        System.out.println("\nMining pending transactions...");
+        blockchain.minePendingTransactions();
 
-        System.out.println("Mining block 3...");
-        blockchain.addBlock("Transaction: Charlie sent 2 BTC to Alice");
+        blockchain.addTransaction(new Transaction("Alice", "David", 5.0));
+        blockchain.minePendingTransactions();
 
-        System.out.println("\n=== Blockchain ===");
+        System.out.println("\n=== Final Blockchain ===");
         blockchain.printChain();
 
         System.out.println("\nIs blockchain valid? " + blockchain.isChainValid());
-
-        // Test tampering
-        System.out.println("\nTampering with block 1 data...");
-        blockchain.getChain().get(1).data = "Hacked data!";  // Note: this is not proper way, just for demo
-
-        System.out.println("Is blockchain still valid? " + blockchain.isChainValid());
     }
 }

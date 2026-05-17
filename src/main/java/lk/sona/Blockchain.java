@@ -6,35 +6,54 @@ import java.util.List;
 public class Blockchain {
     private List<Block> chain;
     private int difficulty;
+    private List<Transaction> pendingTransactions;
 
     public Blockchain(int difficulty) {
         this.chain = new ArrayList<>();
+        this.pendingTransactions = new ArrayList<>();
         this.difficulty = difficulty;
-        // Create Genesis Block
-        Block genesis = new Block(0, "0", "Genesis Block");
+
+        // Genesis Block
+        Block genesis = new Block(0, "0");
+        genesis.addTransaction(new Transaction("System", "Genesis", 0));
         genesis.mineBlock(difficulty);
         chain.add(genesis);
     }
 
-    public void addBlock(String data) {
-        Block previousBlock = chain.get(chain.size() - 1);
-        Block newBlock = new Block(chain.size(), previousBlock.getHash(), data);
-        newBlock.mineBlock(difficulty);
-        chain.add(newBlock);
+    public void addTransaction(Transaction transaction) {
+        pendingTransactions.add(transaction);
+        System.out.println("Transaction added to pending: " + transaction);
     }
 
-    // Validate the entire chain
+    public void minePendingTransactions() {
+        if (pendingTransactions.isEmpty()) {
+            System.out.println("No transactions to mine.");
+            return;
+        }
+
+        Block newBlock = new Block(chain.size(), chain.get(chain.size() - 1).getHash());
+
+        // Add all pending transactions to this block
+        for (Transaction tx : pendingTransactions) {
+            newBlock.addTransaction(tx);
+        }
+
+        newBlock.mineBlock(difficulty);
+        chain.add(newBlock);
+
+        // Clear pending transactions
+        pendingTransactions.clear();
+        System.out.println("Block mined successfully!");
+    }
+
     public boolean isChainValid() {
         for (int i = 1; i < chain.size(); i++) {
             Block current = chain.get(i);
             Block previous = chain.get(i - 1);
 
-            // Check current hash
             if (!current.getHash().equals(current.calculateHash())) {
                 return false;
             }
-
-            // Check link with previous block
             if (!current.getPreviousHash().equals(previous.getHash())) {
                 return false;
             }
@@ -44,15 +63,13 @@ public class Blockchain {
 
     public void printChain() {
         for (Block block : chain) {
-            System.out.println("Block #" + block.getIndex());
-            System.out.println("Data     : " + block.getData());
-            System.out.println("Hash     : " + block.getHash());
-            System.out.println("Prev Hash: " + block.getPreviousHash());
-            System.out.println("--------------------------------");
+            System.out.println("\nBlock #" + block.getIndex());
+            System.out.println("Previous Hash : " + block.getPreviousHash());
+            System.out.println("Hash          : " + block.getHash());
+            System.out.println("Transactions  :");
+            for (Transaction tx : block.getTransactions()) {
+                System.out.println("   " + tx);
+            }
         }
-    }
-
-    public List<Block> getChain() {
-        return chain;
     }
 }
