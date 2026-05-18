@@ -125,4 +125,17 @@ public class Blockchain {
 
         return true;
     }
+
+    // Get the chain (needed for saving)
+    public List<Block> getChain() {
+        return chain;
+    }
+
+    // Replace current chain (used when loading)
+    public void replaceChain(List<Block> newChain) {
+        if (newChain != null && !newChain.isEmpty()) {
+            this.chain = newChain;
+            System.out.println("Blockchain replaced with loaded data.");
+        }
+    }
 }

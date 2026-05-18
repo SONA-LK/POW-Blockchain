@@ -1,60 +1,55 @@
 package lk.sona;
 
+import java.util.ArrayList;
+import java.util.List;
+
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
+    public static void main(String[] args) {
+        System.out.println("=== Java Blockchain - Level 5 (Persistence) ===\n");
 
-        public static void main(String[] args) {
-            System.out.println("=== Java Blockchain - Level 4 (Balances + Validation) ===\n");
+        Blockchain blockchain;
 
-            Blockchain blockchain = new Blockchain(4);
+        // Try to load existing blockchain
+        List<Block> loadedChain = BlockchainStorage.load();
 
-            Wallet alice = new Wallet();
-            Wallet bob = new Wallet();
-            Wallet charlie = new Wallet();
-
-            System.out.println("Wallets created!");
-
-            // Show initial balances
-            System.out.println("\n--- Initial Balances ---");
-            System.out.println("Alice   : " + blockchain.getBalance(alice.getPublicKeyAsString()));
-            System.out.println("Bob     : " + blockchain.getBalance(bob.getPublicKeyAsString()));
-            System.out.println("Charlie : " + blockchain.getBalance(charlie.getPublicKeyAsString()));
-
-            // Genesis gives some coins to Alice (we'll simulate reward)
-            System.out.println("\nAdding Genesis Reward to Alice...");
-            Transaction genesisReward = new Transaction(new Wallet() { // Temporary hack for demo
-                @Override
-                public String getPublicKeyAsString() {
-                    return "System";
-                }
-            }, alice.getPublicKeyAsString(), 100.0);
-            // Manually set signature for genesis
-            genesisReward = new Transaction(alice, alice.getPublicKeyAsString(), 100.0); // Simplified
-
-            blockchain.addTransaction(new Transaction(alice, alice.getPublicKeyAsString(), 100)); // Reward
-
-            blockchain.minePendingTransactions();
-
-            System.out.println("\n--- Balances After Genesis Reward ---");
-            System.out.println("Alice   : " + blockchain.getBalance(alice.getPublicKeyAsString()));
-
-            // Normal transactions
-            System.out.println("\n--- Making Transactions ---");
-            blockchain.addTransaction(new Transaction(alice, bob.getPublicKeyAsString(), 30.0));
-            blockchain.addTransaction(new Transaction(alice, charlie.getPublicKeyAsString(), 25.0));
-
-            blockchain.minePendingTransactions();
-
-            System.out.println("\n--- Final Balances ---");
-            System.out.println("Alice   : " + blockchain.getBalance(alice.getPublicKeyAsString()));
-            System.out.println("Bob     : " + blockchain.getBalance(bob.getPublicKeyAsString()));
-            System.out.println("Charlie : " + blockchain.getBalance(charlie.getPublicKeyAsString()));
-
-            System.out.println("\n=== Final Blockchain ===");
-            blockchain.printChain();
-
-            System.out.println("\nIs blockchain valid? " + blockchain.isChainValid());
+        if (loadedChain != null && loadedChain.size() > 0) {
+            blockchain = new Blockchain(4);  // Create temporary
+            blockchain.replaceChain(loadedChain);
+        } else {
+            blockchain = new Blockchain(4);  // Fresh blockchain
         }
 
+        Wallet alice = new Wallet();
+        Wallet bob = new Wallet();
+
+        System.out.println("Wallets created!");
+
+        // Add some coins to Alice (Genesis reward)
+        blockchain.addTransaction(new Transaction(alice, alice.getPublicKeyAsString(), 100.0));
+        blockchain.minePendingTransactions();
+
+        // Normal transaction
+        blockchain.addTransaction(new Transaction(alice, bob.getPublicKeyAsString(), 40.0));
+        blockchain.minePendingTransactions();
+
+        blockchain.addTransaction(new Transaction(alice, bob.getPublicKeyAsString(), 10.0));
+        blockchain.minePendingTransactions();
+
+        blockchain.addTransaction(new Transaction(alice, bob.getPublicKeyAsString(), 40.0));
+        blockchain.minePendingTransactions();
+
+        // Show final state
+        System.out.println("\n--- Final Balances ---");
+        System.out.println("Alice   : " + blockchain.getBalance(alice.getPublicKeyAsString()));
+        System.out.println("Bob     : " + blockchain.getBalance(bob.getPublicKeyAsString()));
+
+        blockchain.printChain();
+
+        // Save the blockchain
+        BlockchainStorage.save(blockchain);
+
+        System.out.println("\n✅ Program finished. Run again to see persistence in action!");
+    }
 }

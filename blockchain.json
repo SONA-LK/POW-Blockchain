@@ -1,0 +1,19 @@
+[
+  {
+    "index": 0,
+    "timestamp": 1779085594960,
+    "previousHash": "0",
+    "transactions": [
+      {
+        "transactionId": "01deea749c565b93ac0c224b15631f115a04c9d9e295456466daa241b7973ae4",
+        "sender": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEdGL0E8P3o58bpbqRats3q1Puppbu2LSEmpc3mmwrP2zTDiddVsc5EclsUXf4Gi3ViMra86KGFaSc+L3auWUm6w\u003d\u003d",
+        "receiver": "Genesis",
+        "amount": 0.0,
+        "timestamp": 1779085595210,
+        "signature": "MEUCIEf8UEgrkPtZIK42Qc66xshpzPAhfwD62RMzaOLFm1IOAiEA9m99JzrIU5Xn2A/ZuF6j8xMcCruY+SmTjPpb/xa96jw\u003d"
+      }
+    ],
+    "hash": "0000507c1da0bbae7824d63a80c691cb707724eefea4a35e5c8d10a1216192e4",
+    "nonce": 8967
+  }
+]
