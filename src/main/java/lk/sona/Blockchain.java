@@ -31,19 +31,31 @@ public class Blockchain {
             return;
         }
 
+        // Validate all pending transactions
+        List<Transaction> validTransactions = new ArrayList<>();
+        for (Transaction tx : pendingTransactions) {
+            if (isValidTransaction(tx)) {
+                validTransactions.add(tx);
+            }
+        }
+
+        if (validTransactions.isEmpty()) {
+            System.out.println("No valid transactions to mine.");
+            pendingTransactions.clear();
+            return;
+        }
+
         Block newBlock = new Block(chain.size(), chain.get(chain.size() - 1).getHash());
 
-        // Add all pending transactions to this block
-        for (Transaction tx : pendingTransactions) {
+        for (Transaction tx : validTransactions) {
             newBlock.addTransaction(tx);
         }
 
         newBlock.mineBlock(difficulty);
         chain.add(newBlock);
 
-        // Clear pending transactions
         pendingTransactions.clear();
-        System.out.println("Block mined successfully!");
+        System.out.println("✅ Block mined successfully with " + validTransactions.size() + " transaction(s)!");
     }
 
     public boolean isChainValid() {
@@ -71,5 +83,46 @@ public class Blockchain {
                 System.out.println("   " + tx);
             }
         }
+    }
+
+    // Calculate balance for a wallet (public key)
+    public double getBalance(String publicKey) {
+        double balance = 0.0;
+
+        for (Block block : chain) {
+            for (Transaction tx : block.getTransactions()) {
+                // Money coming in
+                if (tx.getReceiver().equals(publicKey)) {
+                    balance += tx.getAmount();
+                }
+                // Money going out
+                if (tx.getSender().equals(publicKey)) {
+                    balance -= tx.getAmount();
+                }
+            }
+        }
+        return balance;
+    }
+
+    // Validate transaction before adding
+    public boolean isValidTransaction(Transaction tx) {
+        if (tx.getSender().equals("System")) {
+            return true; // Genesis transaction
+        }
+
+        double senderBalance = getBalance(tx.getSender());
+
+        if (senderBalance < tx.getAmount()) {
+            System.out.println("❌ Transaction rejected: Insufficient balance! "
+                    + "Has: " + senderBalance + ", Trying to send: " + tx.getAmount());
+            return false;
+        }
+
+        if (!tx.verifySignature()) {
+            System.out.println("❌ Transaction rejected: Invalid signature!");
+            return false;
+        }
+
+        return true;
     }
 }

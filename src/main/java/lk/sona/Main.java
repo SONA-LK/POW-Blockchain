@@ -3,38 +3,58 @@ package lk.sona;
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    public static void main(String[] args) {
-        System.out.println("=== Java Blockchain - Level 3 (Wallets + Signatures) ===\n");
 
-        Blockchain blockchain = new Blockchain(4);
+        public static void main(String[] args) {
+            System.out.println("=== Java Blockchain - Level 4 (Balances + Validation) ===\n");
 
-        // Create Wallets
-        Wallet alice = new Wallet();
-        Wallet bob = new Wallet();
-        Wallet charlie = new Wallet();
+            Blockchain blockchain = new Blockchain(4);
 
-        System.out.println("Wallets created successfully!");
+            Wallet alice = new Wallet();
+            Wallet bob = new Wallet();
+            Wallet charlie = new Wallet();
 
-        // Create signed transactions
-        System.out.println("\nCreating transactions...");
-        Transaction tx1 = new Transaction(alice, bob.getPublicKeyAsString(), 25.0);
-        Transaction tx2 = new Transaction(bob, charlie.getPublicKeyAsString(), 8.5);
-        Transaction tx3 = new Transaction(alice, charlie.getPublicKeyAsString(), 12.0);
+            System.out.println("Wallets created!");
 
-        blockchain.addTransaction(tx1);
-        blockchain.addTransaction(tx2);
-        blockchain.addTransaction(tx3);
+            // Show initial balances
+            System.out.println("\n--- Initial Balances ---");
+            System.out.println("Alice   : " + blockchain.getBalance(alice.getPublicKeyAsString()));
+            System.out.println("Bob     : " + blockchain.getBalance(bob.getPublicKeyAsString()));
+            System.out.println("Charlie : " + blockchain.getBalance(charlie.getPublicKeyAsString()));
 
-        System.out.println("\nMining pending transactions...");
-        blockchain.minePendingTransactions();
+            // Genesis gives some coins to Alice (we'll simulate reward)
+            System.out.println("\nAdding Genesis Reward to Alice...");
+            Transaction genesisReward = new Transaction(new Wallet() { // Temporary hack for demo
+                @Override
+                public String getPublicKeyAsString() {
+                    return "System";
+                }
+            }, alice.getPublicKeyAsString(), 100.0);
+            // Manually set signature for genesis
+            genesisReward = new Transaction(alice, alice.getPublicKeyAsString(), 100.0); // Simplified
 
-        System.out.println("\n=== Final Blockchain ===");
-        blockchain.printChain();
+            blockchain.addTransaction(new Transaction(alice, alice.getPublicKeyAsString(), 100)); // Reward
 
-        System.out.println("\nIs blockchain valid? " + blockchain.isChainValid());
+            blockchain.minePendingTransactions();
 
-        // Test signature verification
-        System.out.println("\nVerifying first transaction signature: " +
-                tx1.verifySignature());
-    }
+            System.out.println("\n--- Balances After Genesis Reward ---");
+            System.out.println("Alice   : " + blockchain.getBalance(alice.getPublicKeyAsString()));
+
+            // Normal transactions
+            System.out.println("\n--- Making Transactions ---");
+            blockchain.addTransaction(new Transaction(alice, bob.getPublicKeyAsString(), 30.0));
+            blockchain.addTransaction(new Transaction(alice, charlie.getPublicKeyAsString(), 25.0));
+
+            blockchain.minePendingTransactions();
+
+            System.out.println("\n--- Final Balances ---");
+            System.out.println("Alice   : " + blockchain.getBalance(alice.getPublicKeyAsString()));
+            System.out.println("Bob     : " + blockchain.getBalance(bob.getPublicKeyAsString()));
+            System.out.println("Charlie : " + blockchain.getBalance(charlie.getPublicKeyAsString()));
+
+            System.out.println("\n=== Final Blockchain ===");
+            blockchain.printChain();
+
+            System.out.println("\nIs blockchain valid? " + blockchain.isChainValid());
+        }
+
 }
